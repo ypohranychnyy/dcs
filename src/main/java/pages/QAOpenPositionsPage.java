@@ -10,12 +10,14 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import waiting.WaitForCondition;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QAPage {
+public class QAOpenPositionsPage {
     private final WebDriverWait wait;
     WebDriver driver;
     @FindBy(xpath = "//a[contains(text(), 'See all QA jobs')]")
@@ -43,19 +45,18 @@ public class QAPage {
     @FindBy(id = "filter-by-location")
     WebElement filterByLocationDropDown;
 
-    public QAPage(WebDriver driver) {
+    public QAOpenPositionsPage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        Actions actions = new Actions(this.driver);
-
-        new WebDriverWait(driver, Duration.ofSeconds(5)).until(
-                webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
+        wait = WaitForCondition.getInstance(driver);
+        // waiting for the list of all locations to load
+        new WebDriverWait(driver, Duration.ofSeconds(5)).until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
+        Assert.assertTrue(this.isPageOpened());
     }
 
     public void clickSeeAllJobs() {
         seeAllQAJobsButton.click();
-        isCorrectUrl();
+        Assert.assertTrue(qualityAssuranceJobsPageIsLoaded());
         this.wait.until(ExpectedConditions.visibilityOf(jobTitle));
         scrollToSeeAllPositions();
     }
@@ -68,23 +69,22 @@ public class QAPage {
         return locations;
     }
 
-    public void selectLocation() {
+    public void selectLocation(String location) {
         Select select = new Select(filterByLocationDropDown);
         List<WebElement> options = select.getOptions();
         for (WebElement option : options) {
-            if (option.getText().equals("Istanbul, Turkey")) {
+            if (option.getText().contains(location)) {
                 option.click();
                 break;
             }
         }
         scrollToSeeAllPositions();
         waitForLocationsUpdate();
-        areAllJobsInIstanbul();
+        areAllJobsInLocation(location);
     }
 
     public void scrollToSeeAllPositions() {
-        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({" +
-                " block: 'center' });", jobTitle);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({" + " block: 'center' });", jobTitle);
         wait.until(ExpectedConditions.visibilityOf(jobTitle));
         try {
             Thread.sleep(2000);
@@ -96,24 +96,23 @@ public class QAPage {
     public void waitForLocationsUpdate() {
         this.wait.until(ExpectedConditions.visibilityOfAllElements(jobLocations));
 
-        boolean allMatch = jobLocations.stream()
-                .allMatch(option -> option.getText().contains("Istanbul, Turkey"));
+        boolean allMatch = jobLocations.stream().allMatch(option -> option.getText().contains("Istanbul, Turkey"));
 
         if (!allMatch) {
             throw new AssertionError("Not all location options contain 'Istanbul, Turkey'");
         }
     }
 
-    public boolean areAllJobsInIstanbul() {
+    public boolean areAllJobsInLocation(String expectedLocation) {
         List<String> locations = getJobLocations();
-        return locations.stream().allMatch(location -> location.contains("Istanbul, Turkey"));
+        return locations.stream().allMatch(location -> location.contains(expectedLocation));
     }
 
-    public String getFirstJobTitle() throws Exception {
+    public String getJobTitle(int index) throws Exception {
         if (jobTitles.isEmpty()) {
             throw new Exception("Job titles list is empty");
         }
-        return jobTitles.get(0).getText();
+        return jobTitles.get(index).getText();
     }
 
     public ApplyPage clickViewRoleBtn(String partialPositionDescription) {
@@ -136,7 +135,7 @@ public class QAPage {
         throw new NotFoundException(String.format("I have not found an element with %s description", partialPositionDescription));
     }
 
-    public boolean isCorrectUrl() {
+    public boolean qualityAssuranceJobsPageIsLoaded() {
         String expectedUrl = "https://useinsider.com/careers/open-positions/?department=qualityassurance";
         String actualUrl = driver.getCurrentUrl();
         return expectedUrl.equals(actualUrl);

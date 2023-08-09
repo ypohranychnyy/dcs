@@ -7,12 +7,14 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.testng.Assert;
+import waiting.WaitForCondition;
 
-import java.time.Duration;
+import static org.testng.Assert.assertTrue;
 
 public class CareersPage {
-    private WebDriver driver;
-    private WebDriverWait wait;
+    private final WebDriver driver;
+    private final WebDriverWait wait;
     @FindBy(css = "a.btn.btn-outline-secondary.rounded.text-medium.mt-5.mx-auto.py-3.loadmore")
     private WebElement seeAllTeamsButton;
     @FindBy(xpath = "//h3[text()='Quality Assurance']")
@@ -28,11 +30,11 @@ public class CareersPage {
     @FindBy(xpath = "//div[@class='elementor-text-editor elementor-clearfix']//p[contains(text(), 'We’re here to grow and drive growth—as none of us did before.')]")
     private WebElement seeLifeAtTheInsiderText;
 
-
     public CareersPage(WebDriver driver) {
         this.driver = driver;
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait = WaitForCondition.getInstance(driver);
         PageFactory.initElements(driver, this);
+        Assert.assertTrue(this.isPageOpened());
     }
 
     public void scrollToSeeAllTeams() {
@@ -65,10 +67,10 @@ public class CareersPage {
         }
     }
 
-    public QAPage clickQualityAssurance() {
+    public QAOpenPositionsPage clickQualityAssurance() {
         wait.until(ExpectedConditions.elementToBeClickable(qaTeamLink));
         qaTeamLink.click();
-        return new QAPage(driver);
+        return new QAOpenPositionsPage(driver);
     }
 
     public boolean isPageOpened() {
@@ -104,5 +106,16 @@ public class CareersPage {
     public boolean isLifeAtInsiderVisible() {
         wait.until(ExpectedConditions.visibilityOf(seeLifeAtTheInsiderText));
         return seeLifeAtTheInsiderText.isDisplayed();
+    }
+
+    public QAOpenPositionsPage goToQAOpenPositionsPage() {
+        this.scrollToSeeOurLocations();
+        assertTrue(this.isLocationsListVisible(), "Locations list is not visible");
+        this.scrollToSeeLifeAtTheInsider();
+        assertTrue(this.isLifeAtInsiderVisible(), "Life at Insider is not visible");
+        this.scrollToSeeAllTeams();
+        this.clickSeeAllTeams();
+        this.scrollToQualityAssurance();
+        return this.clickQualityAssurance();
     }
 }

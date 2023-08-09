@@ -1,6 +1,5 @@
 import client.ApiException;
 import client.api.PetApi;
-import client.model.Category;
 import client.model.Pet;
 import org.testng.Assert;
 import org.testng.annotations.Test;

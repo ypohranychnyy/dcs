@@ -3,6 +3,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -11,7 +12,7 @@ import org.testng.annotations.Test;
 import pages.ApplyPage;
 import pages.CareersPage;
 import pages.HomePage;
-import pages.QAPage;
+import pages.QAOpenPositionsPage;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,38 +48,30 @@ public class InsiderTest {
     }
 
     @Test
-    public void testInsiderCareerPage() throws Exception {
+    public void testThatItsPossibleToOpenQARelatedJob() throws Exception {
         HomePage homePage = new HomePage(driver);
         homePage.navigateTo(url);
-        assertTrue(driver.getCurrentUrl().contains(url), "Home page is not opened");
 
-        homePage.clickAcceptAll();
-        homePage.clickCompanyMenu();
-        CareersPage careersPage = homePage.clickCareersOption();
-        assertTrue(careersPage.isPageOpened(), "Career page is not opened");
+        homePage.clickAcceptAllCookies();
+        CareersPage careersPage = homePage.goToCareersPage();
 
-        careersPage.scrollToSeeOurLocations();
-        assertTrue(careersPage.isLocationsListVisible(), "Locations list is not visible");
-        careersPage.scrollToSeeLifeAtTheInsider();
-        assertTrue(careersPage.isLifeAtInsiderVisible(), "Life at Insider is not visible");
-        careersPage.scrollToSeeAllTeams();
-        careersPage.clickSeeAllTeams();
-        careersPage.scrollToQualityAssurance();
-        QAPage qaPage = careersPage.clickQualityAssurance();
-        assertTrue(qaPage.isPageOpened(), "QA page is not opened");
+        QAOpenPositionsPage qaOpenPositionsPage = careersPage.goToQAOpenPositionsPage();
 
-        qaPage.clickSeeAllJobs();
-        qaPage.selectLocation();
-        assertTrue(qaPage.areAllJobsInIstanbul());
-        String firstJobTitle = qaPage.getFirstJobTitle();
-        ApplyPage applyPage = qaPage.clickViewRoleBtn(firstJobTitle);
+        qaOpenPositionsPage.clickSeeAllJobs();
+        String location = "Istanbul, Turkey";
+        qaOpenPositionsPage.selectLocation(location);
+        assertTrue(qaOpenPositionsPage.areAllJobsInLocation(location));
+        String firstJobTitle = qaOpenPositionsPage.getJobTitle(0);
+        ApplyPage applyPage = qaOpenPositionsPage.clickViewRoleBtn(firstJobTitle);
+
+        // Page is going to be opened in a new tab, so we need to switch to it
         ArrayList<String> tabs = new ArrayList<String>(driver.getWindowHandles());
         driver.switchTo().window(tabs.get(1));
         assertTrue(applyPage.getCurrentUrl().contains("jobs.lever.co/useinsider"), "Redirect to Lever application form failed");
-        applyPage.verifyJobTitle(firstJobTitle);
+        Assert.assertEquals(applyPage.getJobTitle(), firstJobTitle, "Job Title does not match");
+
         applyPage.clickApplyForThisJobButton();
         assertTrue(applyPage.applicationForm.isDisplayed(), "Application form is not displayed");
-
     }
 
     @AfterMethod

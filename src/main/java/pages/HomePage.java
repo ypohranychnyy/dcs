@@ -1,34 +1,29 @@
 package pages;
 
+import components.CookiesBanner;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import java.time.Duration;
+import waiting.WaitForCondition;
 
 public class HomePage {
-    private final WebDriverWait wait;
     WebDriver driver;
+    WebDriverWait wait;
+    CookiesBanner cookiesBanner;
 
-    @FindBy(xpath = "//nav//li[5]/a")
+    @FindBy(xpath = "//a[@class='nav-link dropdown-toggle' and contains(text(), 'Company')]")
     WebElement company;
-
-    @FindBy(xpath = "//nav//li[5]//div[2]/a[2]")
+    @FindBy(xpath = "//a[@class='dropdown-sub' and contains(@href, 'careers')]")
     WebElement careersOption;
-
-
-    @FindBy(xpath = "//title[text()='#1 Leader in Individualized, Cross-Channel CX — Insider']")  // assuming there's an  tag with this text
-    WebElement homeHeader;
-    @FindBy(css = "a#wt-cli-accept-all-btn")
-    WebElement acceptAllButton;
 
     public HomePage(WebDriver driver) {
         this.driver = driver;
         PageFactory.initElements(driver, this);
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.cookiesBanner = new CookiesBanner(driver);
+        this.wait = WaitForCondition.getInstance(driver);
     }
 
     public void navigateTo(String url) {
@@ -36,19 +31,17 @@ public class HomePage {
     }
 
     public void clickCompanyMenu() {
-        company.click();
+        this.company.click();
         this.wait.until(ExpectedConditions.visibilityOf(careersOption));
     }
 
-    public CareersPage clickCareersOption() {
-        careersOption.click();
+    public CareersPage goToCareersPage() {
+        this.clickCompanyMenu();
+        this.careersOption.click();
         return new CareersPage(driver);
     }
 
-    public void clickAcceptAll() {
-        this.wait.until(ExpectedConditions.elementToBeClickable(acceptAllButton));
-        acceptAllButton.click();
-        this.wait.until(ExpectedConditions.invisibilityOfAllElements(acceptAllButton));
+    public void clickAcceptAllCookies() {
+        this.cookiesBanner.clickAcceptAll();
     }
-
 }
