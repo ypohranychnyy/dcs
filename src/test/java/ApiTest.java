@@ -41,8 +41,5 @@ public class ApiTest {
         } catch (ApiException e) {
             Assert.assertEquals(404, e.getCode());
         }
-
-
     }
-
 }
