@@ -23,6 +23,13 @@
 * WaitForCondition is also a reusable function taken separately.
 * Screenshots are take on every failure and rewritten in case of the following failures
 
+_For future improvements_: 
+
+Enums could be used instead of string for testing all drop-down options in location and department filters.
+
+Separate check can be done for the amount and list of countries in Our Location section with the scrolling of the whole list. (There seems to ba a bug: when scrolling all the way to the right - empty slots are displayed)
+
+Thread sleep were used stabilise tests due to some elements loading takes a while
 
 **API Testing**
 
@@ -34,7 +41,6 @@
 * Read: The previously added pet is fetched by its ID, and its details are verified.
 * Update: The name of the pet is updated and then fetched again to verify the update.
 * Delete: The pet is deleted. A subsequent request to get the pet details should result in a 404 status, indicating the pet is not found.
-
 
 **Implementation**:
 The test has been implemented using the provided code snippet. The PetApi class from the client library is used to interact with the endpoints.
