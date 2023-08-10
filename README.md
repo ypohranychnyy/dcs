@@ -27,7 +27,7 @@ _For future improvements_:
 
 Enums could be used instead of string for testing all drop-down options in location and department filters.
 
-Separate check can be done for the amount and list of countries in Our Location section with the scrolling of the whole list. (There seems to ba a bug: when scrolling all the way to the right - empty slots are displayed)
+Separate check can be done for the amount and list of countries in Our Location section with the scrolling of the whole list. (There seems to ba a bug: when scrolling all the way to the right - empty tiles are displayed)
 
 Thread sleep were used stabilise tests due to some elements loading takes a while
 
